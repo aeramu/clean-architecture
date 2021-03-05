@@ -22,6 +22,16 @@ func (r *repository) FindBookByID(ctx context.Context, bookID string) (*entity.B
 }
 
 func (r *repository) InsertBook(ctx context.Context, book entity.Book) error {
-	panic("implement me")
+	model := Book{
+		ID:         book.ID,
+		Title:      book.Title,
+		Author:     book.Author,
+		CoverImage: book.CoverImage,
+	}
+	err := r.db.Coll("book").Save(ctx, mongolib.NewObjectID(), model)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
