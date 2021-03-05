@@ -11,4 +11,5 @@ type Adapter struct {
 
 type BookRepository interface {
 	FindBookByID(ctx context.Context, bookID string) (*entity.Book, error)
+	InsertBook(ctx context.Context, book entity.Book) error
 }

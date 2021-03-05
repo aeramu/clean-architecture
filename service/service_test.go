@@ -26,6 +26,9 @@ func initTest()  {
 func Test_service_CreateBook(t *testing.T)  {
 	var (
 		ctx = context.Background()
+		title = "book title"
+		author = "author name"
+		coverImage = "cover_url.jpg"
 	)
 	type args struct {
 		ctx context.Context
@@ -39,18 +42,99 @@ func Test_service_CreateBook(t *testing.T)  {
 		wantErr bool
 	}{
 		{
-			name:    "should error",
-			prepare: func(){
-
-			},
+			name:    "invalid argument empty title",
+			prepare: nil,
 			args:    args{
 				ctx: ctx,
-				req: api.CreateBookReq{},
+				req: api.CreateBookReq{
+					Title:      "",
+					Author:     author,
+					CoverImage: coverImage,
+				},
 			},
 			want:    nil,
 			wantErr: true,
 		},
-		// TODO: Add test cases.
+		{
+			name:    "invalid argument empty author",
+			prepare: nil,
+			args:    args{
+				ctx: ctx,
+				req: api.CreateBookReq{
+					Title:      title,
+					Author:     "",
+					CoverImage: coverImage,
+				},
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:    "invalid argument empty cover image",
+			prepare: nil,
+			args:    args{
+				ctx: ctx,
+				req: api.CreateBookReq{
+					Title:      title,
+					Author:     author,
+					CoverImage: "",
+				},
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:    "invalid argument cover image contain space",
+			prepare: nil,
+			args:    args{
+				ctx: ctx,
+				req: api.CreateBookReq{
+					Title:      title,
+					Author:     author,
+					CoverImage: "tes .png",
+				},
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:    "error database",
+			prepare: func() {
+				mockBookRepository.On("InsertBook", mock.Anything, mock.Anything).
+					Return(errors.New("some error"))
+			},
+			args:    args{
+				ctx: ctx,
+				req: api.CreateBookReq{
+					Title:      title,
+					Author:     author,
+					CoverImage: coverImage,
+				},
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:    "success",
+			prepare: func() {
+				mockBookRepository.On("InsertBook", mock.Anything, mock.MatchedBy(func(b entity.Book) bool {
+					assert.Equal(t, title, b.Title)
+					assert.Equal(t, author, b.Author)
+					assert.Equal(t, coverImage, b.CoverImage)
+					return true
+				})).Return(nil)
+			},
+			args: args{
+				ctx: ctx,
+				req: api.CreateBookReq{
+					Title:      title,
+					Author:     author,
+					CoverImage: coverImage,
+				},
+			},
+			want:    &api.CreateBookRes{Message: "Success"},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -36,3 +36,17 @@ func (_m *BookRepository) FindBookByID(ctx context.Context, bookID string) (*ent
 
 	return r0, r1
 }
+
+// InsertBook provides a mock function with given fields: ctx, book
+func (_m *BookRepository) InsertBook(ctx context.Context, book entity.Book) error {
+	ret := _m.Called(ctx, book)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, entity.Book) error); ok {
+		r0 = rf(ctx, book)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
