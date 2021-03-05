@@ -5,6 +5,7 @@ package mocks
 import (
 	context "context"
 
+	entity "github.com/aeramu/clean-architecture/entity"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -13,16 +14,25 @@ type BookRepository struct {
 	mock.Mock
 }
 
-// Foo provides a mock function with given fields: ctx
-func (_m *BookRepository) Foo(ctx context.Context) error {
-	ret := _m.Called(ctx)
+// FindBookByID provides a mock function with given fields: ctx, bookID
+func (_m *BookRepository) FindBookByID(ctx context.Context, bookID string) (*entity.Book, error) {
+	ret := _m.Called(ctx, bookID)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context) error); ok {
-		r0 = rf(ctx)
+	var r0 *entity.Book
+	if rf, ok := ret.Get(0).(func(context.Context, string) *entity.Book); ok {
+		r0 = rf(ctx, bookID)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*entity.Book)
+		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, bookID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }

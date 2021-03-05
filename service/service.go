@@ -25,5 +25,15 @@ func (s *service) CreateBook(ctx context.Context, req api.CreateBookReq) (*api.C
 }
 
 func (s *service) GetBook(ctx context.Context, req api.GetBookReq) (*api.GetBookRes, error) {
-	panic("implement me")
+	if err := req.Validate(); err != nil {
+		return nil, err
+	}
+	book, err := s.adapter.BookRepository.FindBookByID(ctx, req.BookID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &api.GetBookRes{
+		Book: book,
+	}, nil
 }

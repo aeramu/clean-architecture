@@ -1,6 +1,9 @@
 package api
 
-import "github.com/aeramu/clean-architecture/entity"
+import (
+	"errors"
+	"github.com/aeramu/clean-architecture/entity"
+)
 
 type CreateBookReq struct {
 }
@@ -21,5 +24,8 @@ func (req CreateBookReq) Validate() error {
 }
 
 func (req GetBookReq) Validate() error {
+	if req.BookID == "" {
+		return errors.New("book id is required")
+	}
 	return nil
 }

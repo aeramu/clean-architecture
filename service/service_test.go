@@ -2,9 +2,12 @@ package service
 
 import (
 	"context"
+	"errors"
+	"github.com/aeramu/clean-architecture/entity"
 	"github.com/stretchr/testify/assert"
 	"github.com/aeramu/clean-architecture/mocks"
 	"github.com/aeramu/clean-architecture/service/api"
+	"github.com/stretchr/testify/mock"
 	"testing"
 )
 
@@ -73,6 +76,13 @@ func Test_service_CreateBook(t *testing.T)  {
 func Test_service_GetBook(t *testing.T)  {
 	var (
 		ctx = context.Background()
+		bookID = "some-id"
+		book = &entity.Book{
+			ID:         bookID,
+			Title:      "some title",
+			Author:     "some author",
+			CoverImage: "some_image.jpg",
+		}
 	)
 	type args struct {
 		ctx context.Context
@@ -86,18 +96,49 @@ func Test_service_GetBook(t *testing.T)  {
 		wantErr bool
 	}{
 		{
-			name:    "should error",
+			name:    "invalid argument empty book id",
 			prepare: func(){
 
 			},
 			args:    args{
 				ctx: ctx,
-				req: api.GetBookReq{},
+				req: api.GetBookReq{
+					BookID: "",
+				},
 			},
 			want:    nil,
 			wantErr: true,
 		},
-		// TODO: Add test cases.
+		{
+			name:    "error database when get book from db",
+			prepare: func(){
+				mockBookRepository.On("FindBookByID", mock.Anything, bookID).
+					Return(nil, errors.New("some error"))
+			},
+			args:    args{
+				ctx: ctx,
+				req: api.GetBookReq{
+					BookID: bookID,
+				},
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:    "success",
+			prepare: func(){
+				mockBookRepository.On("FindBookByID", mock.Anything, bookID).
+					Return(book, nil)
+			},
+			args:    args{
+				ctx: ctx,
+				req: api.GetBookReq{
+					BookID: bookID,
+				},
+			},
+			want:    &api.GetBookRes{Book: book},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
